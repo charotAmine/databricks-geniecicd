@@ -29,7 +29,6 @@ data_sources:
         - column_name: "usage_unit"
           enable_format_assistance: true
           enable_entity_matching: true
-
     - identifier: "prod_catalog.billing.usage"
       column_configs:
         - column_name: "account_id"

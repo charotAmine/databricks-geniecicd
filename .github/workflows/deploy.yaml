@@ -1,0 +1,49 @@
+# SpaceOps CI/CD Pipeline
+
+name: Deploy Genie Spaces
+
+on:
+  push:
+    branches: [main]
+    paths: ['spaces/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: ✅ Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install spaceops
+      - run: |
+          spaceops validate spaces/*/dev/space.yaml
+          spaceops validate spaces/*/prod/space.yaml
+
+  deploy-dev:
+    name: 🚀 Deploy DEV
+    needs: validate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      DATABRICKS_HOST: ${{ secrets.DEV_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DEV_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install spaceops
+      - run: spaceops push spaces/*/dev/space.yaml
+
+  deploy-prod:
+    name: 🏭 Deploy PROD
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      DATABRICKS_HOST: ${{ secrets.PROD_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.PROD_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install spaceops
+      - run: spaceops push spaces/*/prod/space.yaml

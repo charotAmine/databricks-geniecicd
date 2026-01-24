@@ -1,0 +1,115 @@
+# Billing Analytics - PROD Environment
+title: "Billing Analytics"
+description: "AI-powered billing analytics - Production"
+warehouse_id: "148ccb90800933a1"
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data_sources:
+  tables:
+    - identifier: "prod_catalog.billing.list_prices"
+      column_configs:
+        - column_name: "account_id"
+          enable_format_assistance: true
+        - column_name: "cloud"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "currency_code"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "price_end_time"
+          enable_format_assistance: true
+        - column_name: "price_start_time"
+          enable_format_assistance: true
+        - column_name: "pricing"
+        - column_name: "sku_name"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "usage_unit"
+          enable_format_assistance: true
+          enable_entity_matching: true
+
+    - identifier: "prod_catalog.billing.usage"
+      column_configs:
+        - column_name: "account_id"
+          enable_format_assistance: true
+        - column_name: "billing_origin_product"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "cloud"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "custom_tags"
+        - column_name: "sku_name"
+          enable_format_assistance: true
+          enable_entity_matching: true
+        - column_name: "usage_date"
+          enable_format_assistance: true
+        - column_name: "usage_quantity"
+          enable_format_assistance: true
+        - column_name: "workspace_id"
+          enable_format_assistance: true
+
+# =============================================================================
+# INSTRUCTIONS
+# =============================================================================
+instructions:
+  - content: "DBU stands for Databricks Unit - the unit of processing capability used for billing."
+  - content: "When calculating costs, multiply usage_quantity by the pricing rate from list_prices after joining on sku_name."
+  - content: "For time-based analysis, always filter on usage_date for optimal performance."
+  - content: "Group by billing_origin_product to show costs by product type (Jobs, SQL, Serverless)."
+
+# =============================================================================
+# JOINS
+# =============================================================================
+joins:
+  - left_table: "prod_catalog.billing.list_prices"
+    right_table: "prod_catalog.billing.usage"
+    condition: "list_prices.sku_name = usage.sku_name"
+    relationship_type: "MANY_TO_ONE"
+
+# =============================================================================
+# EXAMPLE QUERIES
+# =============================================================================
+example_queries:
+  - question: "What was our total DBU usage last month?"
+    sql: |
+      SELECT SUM(usage_quantity) as total_dbus
+      FROM prod_catalog.billing.usage
+      WHERE usage_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL 1 MONTH)
+        AND usage_date < DATE_TRUNC('month', CURRENT_DATE)
+
+  - question: "Show top 5 SKUs by usage"
+    sql: |
+      SELECT sku_name, SUM(usage_quantity) as total_usage
+      FROM prod_catalog.billing.usage
+      GROUP BY sku_name
+      ORDER BY total_usage DESC
+      LIMIT 5
+
+  - question: "What is usage by product type?"
+    sql: |
+      SELECT billing_origin_product, SUM(usage_quantity) as total_dbus
+      FROM prod_catalog.billing.usage
+      GROUP BY billing_origin_product
+      ORDER BY total_dbus DESC
+
+# =============================================================================
+# SQL SNIPPETS
+# =============================================================================
+filters:
+  - name: "Last 30 Days"
+    sql: "usage_date >= CURRENT_DATE - INTERVAL 30 DAY"
+  - name: "Current Month"
+    sql: "usage_date >= DATE_TRUNC('month', CURRENT_DATE)"
+
+expressions:
+  - name: "Cost Estimate"
+    sql: "usage_quantity * pricing.default"
+
+measures:
+  - name: "Total DBUs"
+    sql: "SUM(usage_quantity)"
+  - name: "Workspace Count"
+    sql: "COUNT(DISTINCT workspace_id)"

@@ -1,0 +1,105 @@
+title: Hiring Trends Test
+warehouse_id: 4b9b953939869799
+version: 2
+data_sources:
+  tables:
+  - identifier: mmolony_hunter_ip.hunter_research.gold_hiring_activity
+    column_configs:
+    - column_name: account_id
+      enable_format_assistance: true
+    - column_name: account_name
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: confidence_score
+      enable_format_assistance: true
+    - column_name: has_databricks_in_job_ads
+      enable_format_assistance: true
+    - column_name: has_mlflow_in_job_ads
+      enable_format_assistance: true
+    - column_name: has_spark_in_job_ads
+      enable_format_assistance: true
+    - column_name: has_team_growth
+      enable_format_assistance: true
+    - column_name: hiring_intensity
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: is_actively_hiring_data
+      enable_format_assistance: true
+    - column_name: is_hiring_leadership
+      enable_format_assistance: true
+    - column_name: is_hiring_platform_roles
+      enable_format_assistance: true
+    - column_name: open_roles_json
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: team_build_stage
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: team_size_signals
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: technologies_in_jobs_json
+      enable_format_assistance: true
+      enable_entity_matching: true
+  - identifier: users.derek_yeager.bronze_personnel_hiring_records
+    column_configs:
+    - column_name: applicant_id
+      enable_format_assistance: true
+    - column_name: application_date
+      enable_format_assistance: true
+    - column_name: component
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: extracted_timestamp
+      enable_format_assistance: true
+    - column_name: hire_date
+      enable_format_assistance: true
+    - column_name: hiring_event_id
+      enable_format_assistance: true
+    - column_name: position_type
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: status
+      enable_format_assistance: true
+      enable_entity_matching: true
+  - identifier: users.derek_yeager.gold_hiring_progress
+    column_configs:
+    - column_name: component
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: current_hires
+      enable_format_assistance: true
+    - column_name: pct_complete
+      enable_format_assistance: true
+    - column_name: position_type
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: target_hires
+      enable_format_assistance: true
+benchmarks:
+  questions:
+  - id: 01f0fe9fe8c71bbdaaea2761adc06521
+    question:
+    - What is the count of hires by component and position type?
+    answer:
+    - format: SQL
+      content:
+      - 'SELECT `component`, `position_type`, COUNT(*) AS hire_count
+
+        '
+      - 'FROM `users`.`derek_yeager`.`bronze_personnel_hiring_records`
+
+        '
+      - 'WHERE `status` ILIKE ''%hire%''
+
+        '
+      - '  AND `component` IS NOT NULL
+
+        '
+      - '  AND `position_type` IS NOT NULL
+
+        '
+      - 'GROUP BY `component`, `position_type`
+
+        '
+      - ORDER BY hire_count DESC

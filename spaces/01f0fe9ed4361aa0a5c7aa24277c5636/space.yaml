@@ -1,0 +1,10 @@
+data_sources:
+  tables: []
+description: ''
+example_queries: []
+functions: null
+instructions: []
+joins: []
+permissions: null
+title: Hiring Trends Test
+warehouse_id: 4b9b953939869799

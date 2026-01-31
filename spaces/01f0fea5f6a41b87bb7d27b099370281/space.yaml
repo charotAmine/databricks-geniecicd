@@ -1,0 +1,10 @@
+data_sources:
+  tables: []
+description: Genie space for utech demo with curated questions and SQL instructions
+example_queries: []
+functions: null
+instructions: []
+joins: []
+permissions: null
+title: uTech - Fidelite & Ruptures (UC A+B) - Genie AI-BI
+warehouse_id: 862f1d757f0424f7

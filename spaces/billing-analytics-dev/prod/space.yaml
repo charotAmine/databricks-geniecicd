@@ -1,5 +1,5 @@
 title: Billing Analytics (DEV)
-warehouse_id: 4b9b953939869799
+warehouse_id: 5fbd59aea01bde43
 description: AI-powered billing analytics - Development
 version: 2
 data_sources:
@@ -50,9 +50,9 @@ instructions:
   - id: 01f0f000000000010000000000000000
     content: DBU stands for Databricks Unit - the unit of processing capability used
       for billing.When calculating costs, multiply usage_quantity by the pricing rate
-      from list_prices after joining on sku_name.For time-based analysis, always filter
-      on usage_date for optimal performance.Group by billing_origin_product to show
-      costs by product type (Jobs, SQL, Serverless).
+      fggrom list_prices after joining on sku_name.For time-based analysis, always
+      filter on usage_date for optimal performance.Group by billing_origin_product
+      to show costs by product type (Jobs, SQL, Serverless).
   example_question_sqls:
   - id: 01f0f000000000020000000000000000
     question: What was our total DBU usage last month?
@@ -75,9 +75,9 @@ instructions:
     right:
       identifier: dev_catalog.billing.usage
       alias: usage
-    sql: |-
-      list_prices.sku_name = usage.sku_name
-      --rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--
+    sql: 'list_prices.sku_name = usage.sku_name
+
+      --rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--'
   sql_snippets:
     filters:
     - id: 01f0f000000000060000000000000000

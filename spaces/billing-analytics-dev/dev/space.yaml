@@ -50,9 +50,9 @@ instructions:
   - id: 01f0f000000000010000000000000000
     content: DBU stands for Databricks Unit - the unit of processing capability used
       for billing.When calculating costs, multiply usage_quantity by the pricing rate
-      from list_prices after joining on sku_name.For time-based analysis, always filter
-      on usage_date for optimal performance.Group by billing_origin_product to show
-      costs by product type (Jobs, SQL, Serverless).
+      fggrom list_prices after joining on sku_name.For time-based analysis, always
+      filter on usage_date for optimal performance.Group by billing_origin_product
+      to show costs by product type (Jobs, SQL, Serverless).
   example_question_sqls:
   - id: 01f0f000000000020000000000000000
     question: What was our total DBU usage last month?

@@ -1,49 +1,72 @@
-# SpaceOps CI/CD Pipeline
-
 name: Deploy Genie Spaces
 
 on:
   push:
-    branches: [main]
-    paths: ['spaces/**']
+    branches:
+      - main
+    paths:
+      - 'spaces/**/prod/space.yaml'
   pull_request:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   validate:
-    name: ✅ Validate
+    name: Validate Configurations
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install spaceops
-      - run: |
-          spaceops validate spaces/*/dev/space.yaml
-          spaceops validate spaces/*/prod/space.yaml
-
-  deploy-dev:
-    name: 🚀 Deploy DEV
-    needs: validate
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment: dev
-    env:
-      DATABRICKS_HOST: ${{ secrets.DEV_HOST }}
-      DATABRICKS_TOKEN: ${{ secrets.DEV_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: pip install spaceops
-      - run: spaceops push spaces/*/dev/space.yaml
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install SpaceOps
+        run: pip install spaceops
+      
+      - name: Validate all space configurations
+        run: |
+          for file in spaces/*/dev/space.yaml spaces/*/prod/space.yaml; do
+            if [ -f "$file" ]; then
+              echo "Validating $file..."
+              spaceops validate "$file" || exit 1
+            fi
+          done
 
   deploy-prod:
-    name: 🏭 Deploy PROD
-    needs: deploy-dev
+    name: Deploy to Production
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: prod
-    env:
-      DATABRICKS_HOST: ${{ secrets.PROD_HOST }}
-      DATABRICKS_TOKEN: ${{ secrets.PROD_TOKEN }}
+    environment: production
     steps:
       - uses: actions/checkout@v4
-      - run: pip install spaceops
-      - run: spaceops push spaces/*/prod/space.yaml
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install SpaceOps
+        run: pip install spaceops
+      
+      - name: Deploy changed spaces to Production
+        env:
+          DATABRICKS_HOST: ${{ secrets.PROD_DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.PROD_DATABRICKS_TOKEN }}
+        run: |
+          # Get changed prod space files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- 'spaces/*/prod/space.yaml' 2>/dev/null || echo "")
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No production space files changed"
+            exit 0
+          fi
+          
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              echo "Deploying $file..."
+              spaceops push "$file"
+            fi
+          done

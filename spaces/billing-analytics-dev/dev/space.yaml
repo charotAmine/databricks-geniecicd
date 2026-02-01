@@ -1,0 +1,99 @@
+title: Billing Analytics (DEV)
+warehouse_id: e2d9b4f5a250c9e4
+description: AI-powered billing analytics - Development
+version: 2
+data_sources:
+  tables:
+  - identifier: dev_catalog.billing.list_prices
+    column_configs:
+    - column_name: account_id
+      enable_format_assistance: true
+    - column_name: cloud
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: currency_code
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: price_end_time
+      enable_format_assistance: true
+    - column_name: price_start_time
+      enable_format_assistance: true
+    - column_name: pricing
+    - column_name: sku_name
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: usage_unit
+      enable_format_assistance: true
+      enable_entity_matching: true
+  - identifier: dev_catalog.billing.usage
+    column_configs:
+    - column_name: account_id
+      enable_format_assistance: true
+    - column_name: billing_origin_product
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: cloud
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: custom_tags
+    - column_name: sku_name
+      enable_format_assistance: true
+      enable_entity_matching: true
+    - column_name: usage_date
+      enable_format_assistance: true
+    - column_name: usage_quantity
+      enable_format_assistance: true
+    - column_name: workspace_id
+      enable_format_assistance: true
+instructions:
+  text_instructions:
+  - id: 01f0f000000000010000000000000000
+    content: DBU stands for Databricks Unit - the unit of processing capability used
+      for billing.When calculating costs, multiply usage_quantity by the pricing rate
+      fggrom list_prices after joining on sku_name.For time-based analysis, always
+      filter on usage_date for optimal performance.Group by billing_origin_product
+      to show costs by product type (Jobs, SQL, Serverless).
+  example_question_sqls:
+  - id: 01f0f000000000020000000000000000
+    question: What was our total DBU usage last month?
+    sql: SELECT SUM(usage_quantity) as total_dbusFROM dev_catalog.billing.usageWHERE
+      usage_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL 1 MONTH)  AND usage_date
+      < DATE_TRUNC('month', CURRENT_DATE)
+  - id: 01f0f000000000030000000000000000
+    question: Show top 5 SKUs by usage
+    sql: SELECT sku_name, SUM(usage_quantity) as total_usageFROM dev_catalog.billing.usageGROUP
+      BY sku_nameORDER BY total_usage DESCLIMIT 5
+  - id: 01f0f000000000040000000000000000
+    question: What is usage by product type?
+    sql: SELECT billing_origin_product, SUM(usage_quantity) as total_dbusFROM dev_catalog.billing.usageGROUP
+      BY billing_origin_productORDER BY total_dbus DESC
+  join_specs:
+  - id: 01f0f000000000050000000000000000
+    left:
+      identifier: dev_catalog.billing.list_prices
+      alias: list_prices
+    right:
+      identifier: dev_catalog.billing.usage
+      alias: usage
+    sql: 'list_prices.sku_name = usage.sku_name
+
+      --rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--'
+  sql_snippets:
+    filters:
+    - id: 01f0f000000000060000000000000000
+      sql: usage_date >= CURRENT_DATE - INTERVAL 30 DAY
+      display_name: Last 30 Days
+    - id: 01f0f000000000070000000000000000
+      sql: usage_date >= DATE_TRUNC('month', CURRENT_DATE)
+      display_name: Current Month
+    expressions:
+    - id: 01f0f000000000080000000000000000
+      sql: usage_quantity * pricing.default
+      display_name: Cost Estimate
+    measures:
+    - id: 01f0f000000000090000000000000000
+      sql: SUM(usage_quantity)
+      display_name: Total DBUs
+    - id: 01f0f0000000000a0000000000000000
+      sql: COUNT(DISTINCT workspace_id)
+      display_name: Workspace Count

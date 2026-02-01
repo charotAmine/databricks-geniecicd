@@ -1,72 +1,44 @@
-# SpaceOps CI/CD Example
+# Genie Spaces Configuration
 
-Full-featured CI/CD for Databricks Genie spaces using [SpaceOps](https://pypi.org/project/spaceops/).
+This repository contains Databricks Genie space configurations managed by **Genie Management Portal**.
 
 ## 📁 Structure
 
 ```
-dbxsample/
-├── .github/workflows/
-│   └── deploy.yaml
-└── spaces/
-    └── billing-analytics/
-        ├── dev/space.yaml    # DEV environment
-        └── prod/space.yaml   # PROD environment
+spaces/
+└── {space-name}/
+    ├── dev/space.yaml    # Development environment
+    └── prod/space.yaml   # Production environment
 ```
 
-## ✨ Features Included
+## 🌍 Environments
 
-Each space definition includes:
+No environments configured yet.
 
-| Feature | Description |
-|---------|-------------|
-| **Data Sources** | Tables with column configs |
-| **Instructions** | Natural language guidance for Genie |
-| **Joins** | Table relationships |
-| **Example Queries** | Question + SQL pairs |
-| **Filters** | Reusable WHERE clauses |
-| **Expressions** | Calculated fields |
-| **Measures** | Aggregation snippets |
+## 🚀 Workflow
 
-## 🚀 Setup
+1. **Edit** a space in the portal → creates a branch with dev config
+2. **Test** changes using the dev clone
+3. **Push to Prod** → creates PR to main
+4. **Merge** → GitHub Actions deploys to production
 
-### 1. GitHub Secrets
+## 🔧 CI/CD
 
-| Secret | Description |
-|--------|-------------|
-| `DEV_HOST` | DEV workspace URL |
-| `DEV_TOKEN` | DEV API token |
-| `PROD_HOST` | PROD workspace URL |
-| `PROD_TOKEN` | PROD API token |
+Deployments are handled automatically by GitHub Actions when PRs are merged to main.
 
-### 2. Environments
-
-- `dev` - auto-deploy
-- `prod` - require approval ✅
-
-### 3. Deploy
-
-```bash
-git add spaces/
-git commit -m "Update space"
-git push
-```
-
-## 📝 Local Usage
+## 📝 Local Development
 
 ```bash
 pip install spaceops
 
 # Validate
-spaceops validate spaces/billing-analytics/dev/space.yaml
+spaceops validate spaces/my-space/dev/space.yaml
 
-# Deploy to DEV
-export DATABRICKS_HOST="https://dev.databricks.com"
+# Deploy to environment
+export DATABRICKS_HOST="https://your-workspace.databricks.com"
 export DATABRICKS_TOKEN="dapi..."
-spaceops push spaces/billing-analytics/dev/space.yaml
-
-# Deploy to PROD
-export DATABRICKS_HOST="https://prod.databricks.com"
-export DATABRICKS_TOKEN="dapi..."
-spaceops push spaces/billing-analytics/prod/space.yaml
+spaceops push spaces/my-space/dev/space.yaml
 ```
+
+---
+Managed by [Genie Management Portal](https://github.com/charotAmine/databricks-geniecicd)
